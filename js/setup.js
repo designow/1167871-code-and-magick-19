@@ -6,7 +6,6 @@ var qs = function (selector) {
 };
 
 // Константы характеристик волшебников
-
 var WIZARDS_NAME = [{
   name: 'Иван',
   surname: 'да Марья'
@@ -40,7 +39,8 @@ var WIZARDS_NAME = [{
 }
 ];
 
-var WIZARDS_COATS = ['rgb(101, 137, 164)',
+var WIZARDS_COATS = [
+  'rgb(101, 137, 164)',
   'rgb(241, 43, 107)',
   'rgb(146, 100, 161)',
   'rgb(56, 159, 117)',
@@ -58,16 +58,12 @@ var WIZARDS_EYES = [
 
 var wizards = [];
 
-var similarWizardTemplate = document.querySelector('#similar-wizard-template')
-  .content
-  .querySelector('.setup-similar-item');
-
-var fragment = document.createDocumentFragment();
+var similarWizardTemplate = qs('#similar-wizard-template');
+similarWizardTemplate = similarWizardTemplate.content;
 
 qs('.setup').classList.remove('hidden');
 
 // Функция рэндомайзер
-
 var randomizer = function (max) {
   return Math.floor(Math.random() * max);
 };
@@ -81,15 +77,22 @@ var wizardDataGenerator = function (names, coats, eyes) {
   return wizard;
 };
 
-// Создание коллекции из 4 волшебников
-for (var i = 0; i < 4; i++) {
-  wizards.push(wizardDataGenerator(WIZARDS_NAME, WIZARDS_COATS, WIZARDS_EYES));
-  var wizardElement = similarWizardTemplate.cloneNode(true);
-  wizardElement.querySelector('.setup-similar-label').textContent = wizards[i].name;
-  wizardElement.querySelector('.wizard-coat').style.fill = wizards[i].coatColor;
-  wizardElement.querySelector('.wizard-eyes').style.fill = wizards[i].eyesColor;
-  fragment.appendChild(wizardElement);
-}
+// Функция создания коллекции волшебников
+var createCollection = function (count) {
+  for (var i = 0; i < count; i++) {
+    wizards.push(wizardDataGenerator(WIZARDS_NAME, WIZARDS_COATS, WIZARDS_EYES));
+    var wizardElement = similarWizardTemplate.cloneNode(true);
+    wizardElement.querySelector('.setup-similar-label').textContent = wizards[i].name;
+    wizardElement.querySelector('.wizard-coat').style.fill = wizards[i].coatColor;
+    wizardElement.querySelector('.wizard-eyes').style.fill = wizards[i].eyesColor;
+    fragment.appendChild(wizardElement);
+  }
+};
+
+var fragment = document.createDocumentFragment();
+
+// Создаем 4х волшебников
+createCollection(4);
 
 qs('.setup-similar-list').appendChild(fragment);
 qs('.setup-similar').classList.remove('hidden');
