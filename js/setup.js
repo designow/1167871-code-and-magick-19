@@ -1,9 +1,12 @@
 'use strict';
 
 // Функция для выбора элемента DOM
-var qs = function (selector) {
+var getSelector = function (selector) {
   return document.querySelector(selector);
 };
+
+var ESC_KEY = 'Escape';
+var ENTER_KEY = 'Enter';
 
 // Константы характеристик волшебников
 var WIZARDS_NAME = [{
@@ -56,29 +59,35 @@ var WIZARDS_EYES = [
   'green'
 ];
 
-var wizards = [];
+var WIZARDS_FIREBALLS = [
+  '#ee4830',
+  '#30a8ee',
+  '#5ce6c0',
+  '#e848d5',
+  '#e6e848'
+];
 
-var similarWizardTemplate = qs('#similar-wizard-template');
-similarWizardTemplate = similarWizardTemplate.content;
-
-qs('.setup').classList.remove('hidden');
+var WIZARDS_COUNT = 4;
 
 // Функция рэндомайзер
-var randomizer = function (max) {
+var getRandom = function (max) {
   return Math.floor(Math.random() * max);
 };
 
 // Функция создания параметров волшебника
 var wizardDataGenerator = function (names, coats, eyes) {
   var wizard = {};
-  wizard.name = names[randomizer(names.length)].name + ' ' + names[randomizer(names.length)].surname;
-  wizard.coatColor = coats[randomizer(coats.length)];
-  wizard.eyesColor = eyes[randomizer(eyes.length)];
+  wizard.name = names[getRandom(names.length)].name + ' ' + names[getRandom(names.length)].surname;
+  wizard.coatColor = coats[getRandom(coats.length)];
+  wizard.eyesColor = eyes[getRandom(eyes.length)];
   return wizard;
 };
 
 // Функция создания коллекции волшебников
 var createCollection = function (count) {
+  var fragment = document.createDocumentFragment();
+  var wizards = [];
+  var similarWizardTemplate = getSelector('#similar-wizard-template').content;
   for (var i = 0; i < count; i++) {
     wizards.push(wizardDataGenerator(WIZARDS_NAME, WIZARDS_COATS, WIZARDS_EYES));
     var wizardElement = similarWizardTemplate.cloneNode(true);
@@ -87,12 +96,78 @@ var createCollection = function (count) {
     wizardElement.querySelector('.wizard-eyes').style.fill = wizards[i].eyesColor;
     fragment.appendChild(wizardElement);
   }
+  return fragment;
 };
 
-var fragment = document.createDocumentFragment();
-
 // Создаем 4х волшебников
-createCollection(4);
+getSelector('.setup-similar-list').appendChild(createCollection(WIZARDS_COUNT));
+// getSelector('.setup-similar').classList.remove('hidden');
 
-qs('.setup-similar-list').appendChild(fragment);
-qs('.setup-similar').classList.remove('hidden');
+var wizardCoat = getSelector('.setup-wizard .wizard-coat');
+var wizardEyes = getSelector('.setup-wizard .wizard-eyes');
+var wizardFireball = getSelector('.setup-fireball-wrap');
+
+// Открытие и закрытие формы
+
+var onPopupEscHandler = function (evt) {
+  if (evt.key === ESC_KEY && evt.target.classList.value !== 'setup-user-name') {
+    closePopup();
+  }
+};
+
+var onPopupCloseHandler = function (evt) {
+  if (evt.type === 'keydown' && evt.key === ENTER_KEY || evt.type === 'click') {
+    closePopup();
+  }
+};
+
+var CoatChangeHandler = function () {
+  changeWizardColor(wizardCoat, 'fill', WIZARDS_COATS, 'coat-color');
+};
+
+var EyesChangeHandler = function () {
+  changeWizardColor(wizardEyes, 'fill', WIZARDS_EYES, 'eyes-color');
+};
+
+var FireballChangeHandler = function () {
+  changeWizardColor(wizardFireball, 'background', WIZARDS_FIREBALLS, 'fireball-color');
+};
+
+var openPopup = function () {
+
+  getSelector('.setup').classList.remove('hidden');
+  getSelector('.setup-close').addEventListener('click', onPopupCloseHandler);
+  getSelector('.setup-close').addEventListener('keydown', onPopupCloseHandler);
+  document.addEventListener('keydown', onPopupEscHandler);
+  wizardCoat.addEventListener('click', CoatChangeHandler);
+  wizardEyes.addEventListener('click', EyesChangeHandler);
+  wizardFireball.addEventListener('click', FireballChangeHandler);
+};
+
+var closePopup = function () {
+  getSelector('.setup').classList.add('hidden');
+  getSelector('.setup-close').removeEventListener('keydown', onPopupCloseHandler);
+  getSelector('.setup-close').removeEventListener('click', onPopupCloseHandler);
+  document.removeEventListener('keydown', onPopupEscHandler);
+  wizardCoat.removeEventListener('click', CoatChangeHandler);
+  wizardEyes.removeEventListener('click', EyesChangeHandler);
+  wizardFireball.removeEventListener('click', FireballChangeHandler);
+};
+
+
+getSelector('.setup-open').addEventListener('click', function () {
+  openPopup();
+});
+
+getSelector('.setup-open').addEventListener('keydown', function (evt) {
+  if (evt.key === ENTER_KEY) {
+    openPopup();
+  }
+});
+
+// Функция смены цвета частей волшебника
+var changeWizardColor = function (part, property, data, inputName) {
+  var color = data[getRandom(data.length)];
+  part.style[property] = color;
+  getSelector('input[name=\'' + inputName + '\']').value = color;
+};
