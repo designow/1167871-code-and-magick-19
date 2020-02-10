@@ -7,6 +7,7 @@
   var wizardEyes = window.core.getSelector('.setup-wizard .wizard-eyes');
   var wizardFireball = window.core.getSelector('.setup-fireball-wrap');
   var setup = window.core.getSelector('.setup');
+  var form = window.core.getSelector('.setup-wizard-form');
   // Открытие и закрытие формы
 
   var onPopupEscHandler = function (evt) {
@@ -71,6 +72,13 @@
     part.style[property] = color;
     window.core.getSelector('input[name=\'' + inputName + '\']').value = color;
   };
+
+  // Отменяем отправку формы, получаем данные формы и передаем их на отправку через Ajax
+  form.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    var formData = new FormData(form);
+    window.backend.save(formData, closePopup, window.setup.errorHandler);
+  });
 })();
 
 // Drag-and-Drop окна настройки персонажа
