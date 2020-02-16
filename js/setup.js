@@ -27,28 +27,74 @@
     '#e848d5',
     '#e6e848'
   ];
-
+  var COAT_RANK = 2;
+  var EYES_RANK = 1;
   var WIZARDS_COUNT = 4;
-  var userDialog = document.querySelector('.setup');
+  var wizards = [];
+  var wizardCoat = window.core.getSelector('.setup-wizard .wizard-coat');
+  var wizardEyes = window.core.getSelector('.setup-wizard .wizard-eyes');
+  var wizardFireball = window.core.getSelector('.setup-fireball-wrap');
+  var wizardColors = {};
   // userDialog.classList.remove('hidden');
-  var similarListElement = userDialog.querySelector('.setup-similar-list');
-  var similarWizardTemplate = window.core.getSelector('#similar-wizard-template').content;
 
-  var renderWizard = function (wizard) {
-    var wizardElement = similarWizardTemplate.cloneNode(true);
-    wizardElement.querySelector('.setup-similar-label').textContent = wizard.name;
-    wizardElement.querySelector('.wizard-coat').style.fill = wizard.colorCoat;
-    wizardElement.querySelector('.wizard-eyes').style.fill = wizard.colorEyes;
-    return wizardElement;
+  // Система рангов магов
+  var getRank = function (wizard) {
+    var rank = 0;
+    if (wizard.colorCoat === wizardColors['coat-color']) {
+      rank += COAT_RANK;
+
+    }
+    if (wizard.colorEyes === wizardColors['eyes-color']) {
+      rank += EYES_RANK;
+    }
+    return rank;
+  };
+  var namesComparator = function (left, right) {
+    if (left > right) {
+      return 1;
+    } else if (left < right) {
+      return -1;
+    } else {
+      return 0;
+    }
+  };
+  // Могучая функция фильтрации массивов с магами
+  var updateWizards = function () {
+    window.render(wizards.sort(function (left, right) {
+      var rankDiff = getRank(right) - getRank(left);
+      if (rankDiff === 0) {
+        rankDiff = namesComparator(left.name, right.name);
+      }
+      return rankDiff;
+    }));
   };
 
-  var successHandler = function (wizards) {
-    var fragment = document.createDocumentFragment();
-    for (var i = 0; i < WIZARDS_COUNT; i++) {
-      fragment.appendChild(renderWizard(wizards[i]));
-    }
-    similarListElement.appendChild(fragment);
-    window.core.getSelector('.setup-similar').classList.remove('hidden');
+  var CoatChangeHandler = function () {
+    changeWizardColor(wizardCoat, 'fill', window.setup.WIZARDS_COATS, 'coat-color');
+  };
+
+  var EyesChangeHandler = function () {
+    changeWizardColor(wizardEyes, 'fill', window.setup.WIZARDS_EYES, 'eyes-color');
+  };
+
+  var FireballChangeHandler = function () {
+    changeWizardColor(wizardFireball, 'background', window.setup.WIZARDS_FIREBALLS, 'fireball-color');
+  };
+
+  // Функция смены цвета частей волшебника
+
+  var changeWizardColor = function (part, property, data, inputName) {
+    var color = data[window.core.getRandom(data.length)];
+    part.style[property] = color;
+    window.core.getSelector('input[name=\'' + inputName + '\']').value = color;
+    wizardColors[inputName] = color;
+      updateWizards();
+  };
+
+
+  var successHandler = function (data) {
+    wizards = data;
+    updateWizards();
   };
 
   var errorHandler = function (errorMessage) {
@@ -63,11 +109,16 @@
   };
 
   window.backend.load(successHandler, errorHandler);
+
   window.setup = {
     WIZARDS_FIREBALLS: WIZARDS_FIREBALLS,
     WIZARDS_COATS: WIZARDS_COATS,
     WIZARDS_EYES: WIZARDS_EYES,
-    errorHandler: errorHandler
+    errorHandler: errorHandler,
+    WIZARDS_COUNT: WIZARDS_COUNT,
+    CoatChangeHandler: CoatChangeHandler,
+    EyesChangeHandler: EyesChangeHandler,
+    FireballChangeHandler: FireballChangeHandler
   };
 
 })();
