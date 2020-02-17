@@ -88,7 +88,7 @@
     part.style[property] = color;
     window.core.getSelector('input[name=\'' + inputName + '\']').value = color;
     wizardColors[inputName] = color;
-      updateWizards();
+    updateWizards();
   };
 
 
