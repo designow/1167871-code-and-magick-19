@@ -52,11 +52,11 @@
   var namesComparator = function (left, right) {
     if (left > right) {
       return 1;
-    } else if (left < right) {
-      return -1;
-    } else {
-      return 0;
     }
+    if (left < right) {
+      return -1;
+    }
+    return 0;
   };
   // Могучая функция фильтрации массивов с магами
   var updateWizards = function () {
@@ -69,13 +69,13 @@
     }));
   };
 
-  var CoatChangeHandler = function () {
+  var CoatChangeHandler = window.debounce(function () {
     changeWizardColor(wizardCoat, 'fill', window.setup.WIZARDS_COATS, 'coat-color');
-  };
+  });
 
-  var EyesChangeHandler = function () {
+  var EyesChangeHandler = window.debounce(function () {
     changeWizardColor(wizardEyes, 'fill', window.setup.WIZARDS_EYES, 'eyes-color');
-  };
+  });
 
   var FireballChangeHandler = function () {
     changeWizardColor(wizardFireball, 'background', window.setup.WIZARDS_FIREBALLS, 'fireball-color');
